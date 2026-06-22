@@ -92,7 +92,7 @@ VSLAM-UAV/
 ## Quick Start
 
 ```bash
-git clone https://github.com/jenarohi/VSLAM-UAV.git
+git clone https://github.com/jenarohi/GPS-denied-drone-using-VSLAM.git
 cd VSLAM-UAV
 
 # One-command deploy on Jetson
