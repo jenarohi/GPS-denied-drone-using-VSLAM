@@ -1,0 +1,8 @@
+containers/imu-calibration/rosbag_data/
+*.db3
+__pycache__/
+*.pyc
+build/
+install/
+log/
+

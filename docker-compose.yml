@@ -1,0 +1,66 @@
+# VSLAM-UAV Docker Compose
+# Orchestrates the Visual SLAM pipeline on Jetson Orin
+
+services:
+  # ─── RealSense Camera + ROS Node ────────────────────────────────────
+  vslam-core:
+    build:
+      context: ./containers/vslam-core
+      dockerfile: Dockerfile
+    container_name: vslam-core
+    privileged: true
+    network_mode: host
+    ipc: host
+    stdin_open: true
+    tty: true
+    volumes:
+      - /dev:/dev
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-1}
+      - DISPLAY=${DISPLAY}
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # ─── MAVROS Flight Control ──────────────────────────────────────────
+  flight-bridge:
+    build:
+      context: ./containers/flight-bridge
+      dockerfile: Dockerfile
+    container_name: flight-bridge
+    network_mode: host
+    ipc: host
+    stdin_open: true
+    tty: true
+    devices:
+      - ${PIXHAWK_PORT:-/dev/ttyUSB0}:${PIXHAWK_PORT:-/dev/ttyUSB0}
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-1}
+      - PIXHAWK_PORT=${PIXHAWK_PORT:-/dev/ttyUSB0}
+      - PIXHAWK_BAUD=${PIXHAWK_BAUD:-921600}
+    depends_on:
+      - vslam-core
+    restart: unless-stopped
+
+  # ─── IMU Calibration (on-demand) ───────────────────────────────────
+  imu-calibration:
+    build:
+      context: ./containers/imu-calibration
+      dockerfile: Dockerfile
+    container_name: imu-calibration
+    network_mode: host
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./containers/imu-calibration/rosbag_data:/home/calibrator/imu_rosbag
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-1}
+      - DISPLAY=${DISPLAY}
+    profiles:
+      - calibration

@@ -1,0 +1,15 @@
+# IMU Noise Parameters for Intel RealSense D435i
+# Obtained via Allan Variance analysis
+# These values are used by Isaac ROS cuVSLAM for sensor fusion
+
+imu_noise:
+  gyroscope:
+    noise_density: 0.000244          # rad/s/√Hz
+    random_walk: 0.000019393         # rad/s²/√Hz
+  accelerometer:
+    noise_density: 0.001862          # m/s²/√Hz
+    random_walk: 0.003               # m/s³/√Hz
+
+calibration:
+  frequency_hz: 200.0
+  image_jitter_threshold_ms: 22.00
